@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Button, Form, Input, Modal, Select } from "antd";
 import DateSelection from "./components/DateSelection";
 import MatchInfoCard from './components/MatchInfoCard';
+import PickUpLimit, {PickupUnlimit} from './components/PickUpCard';
 
 const MatchDiv = styled.div`
     border: 1px solid black;
@@ -63,14 +64,9 @@ function Pickup() {
 
     const handleFinish = (values) => {
         setIsModalOpen(false);
-        // values.matches = "9/8-17:30";
         values.date = "9/8";
         values.start_time = "17:30";        
         handlePickup(values);
-    };
-
-    const handleFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
     };
 
     return(
@@ -94,53 +90,13 @@ function Pickup() {
                         </Button>
                     </MatchDiv>
                     <Modal title="報名資訊" open={isModalOpen} onCancel={closeForm} footer={null}>
-                        <Form
-                            onFinish={handleFinish}
-                            onFinishFailed={handleFinishFailed}
-                        >
-                            <Form.Item
-                                label="姓名"
-                                name="name"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '請輸入姓名!',
-                                    },
-                                ]}
-                            >
-                                <Input type="text" />
-                            </Form.Item>
-                            <Form.Item style={{width:120}} label="性別" name="gender" required>
-                                <Select>
-                                    <Select.Option value="男">男</Select.Option>
-                                    <Select.Option value="女">女</Select.Option>
-                                </Select>
-                            </Form.Item>
-                            <Form.Item
-                                label="手機"
-                                name="phone"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '請輸入手機號碼!',
-                                    },
-                                    {
-                                        pattern: /^09\d{8}$/,
-                                        message: '手機號碼格式不正確，請輸入 09xx-xxx-xxx 格式!',
-                                    },
-                                ]}
-                            >
-                                <Input type="text" />
-                            </Form.Item>
-                            <Form.Item>
-                                <Button type="primary" 
-                                    htmlType="submit"
-                                    style={{ width: '100%'}}
-                                    >
-                                    完成
-                                </Button>
-                            </Form.Item>
-                        </Form>
+                        { item.limit?
+                            <PickUpLimit handleFinish={handleFinish}/>:
+                            (
+
+                                <PickupUnlimit handleFinish={handleFinish}/>
+                            )
+                        }
                     </Modal>
                 </div>
             ))}

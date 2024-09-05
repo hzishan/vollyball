@@ -37,7 +37,6 @@ function MatchInfoCard({matchData, reservedPerson}) {
                 <p>剩餘名額:</p>
                 <p>{matchData.total_people}</p>
             </div>
-
         </Container>
     )
 }
