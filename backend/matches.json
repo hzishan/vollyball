@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "date": "9/5",
+    "start_time": "05:41",
+    "end_time": "07:42",
+    "total_people": 18,
+    "limit": true,
+    "ratio": {
+      "male": 12,
+      "female": 6
+    }
+  },
+  {
+    "id": 2,
+    "date": "9/9",
+    "start_time": "6:29",
+    "end_time": "9:29",
+    "total_people": 18,
+    "limit": false,
+    "ratio": {
+      "male": 12,
+      "female": 6
+    }
+  },
+  {
+    "id": 3,
+    "date": "9/8",
+    "start_time": "17:30",
+    "end_time": "20:30",
+    "total_people": 18,
+    "limit": false,
+    "ratio": {
+      "male": 12,
+      "female": 6
+    }
+  }
+]

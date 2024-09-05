@@ -1,0 +1,22 @@
+[
+  {
+    "date": "8/31",
+    "start_time": "17:00",
+    "end_time": "21:00",
+    "total_people": "18",
+    "ratio": {
+      "male": "10",
+      "female": "8"
+    }
+  },
+  {
+    "date": "9/1",
+    "start_time": "9:00",
+    "end_time": "12:00",
+    "total_people": "18",
+    "ratio": {
+      "male": "10",
+      "female": "8"
+    }
+  }
+]
