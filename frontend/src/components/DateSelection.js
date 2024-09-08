@@ -29,6 +29,7 @@ export default function DateSelection({onChange}) {
         <div style={{display:"flex", textAlign:"center", alignItems:"center", paddingRight:"10px"}}>
             <p style={{marginRight:"10px"}}>日期:</p>
             <Select
+                style={{width:"100px"}}
                 defaultValue={dateOptions[0]}
                 onChange={onChange}
                 options={dateOptions.map(item => ({value: item}))}

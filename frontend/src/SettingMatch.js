@@ -18,11 +18,24 @@ const MatchDiv = styled.div`
 `;
 
 const today = new Date();
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+function generateString() {
+    let result = '';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < 5; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
 
 function SettingMatch() {
     const [data, setData] = useState(null);
     const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
+    
+
     const initialData = {
+        "id": generateString(),
         "date": date,
         "start_time": today.getHours()+2 + ":" + today.getMinutes(),
         "end_time": today.getHours()+5 + ":" + today.getMinutes(),

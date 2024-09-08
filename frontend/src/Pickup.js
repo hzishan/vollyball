@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import styled from "styled-components";
-import { Button, Form, Input, Modal, Select } from "antd";
+import { Button, Modal } from "antd";
 import DateSelection from "./components/DateSelection";
 import MatchInfoCard from './components/MatchInfoCard';
-import PickUpLimit, {PickupUnlimit} from './components/PickUpCard';
+import PickUpCard from './components/PickUpCard';
 
 const MatchDiv = styled.div`
     border: 1px solid black;
@@ -14,12 +14,18 @@ const MatchDiv = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    
+    button {
+        height: 100%;
+        border-radius: 0 10px 10px 0;
+    }
 `;
 
 const today = new Date();
 
 function Pickup() {
     const [matches, setMatches] = useState(null);
+    const [reserved, setReserved] = useState(null);
     const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -30,8 +36,19 @@ function Pickup() {
             .catch(error => console.error('Error fetching JSON:', error));        
     }, []);
     
+    useEffect(() => {
+        fetch('/get-reserved')
+            .then((response) => response.json())
+            .then((data) => setReserved(data))
+            .catch(error => console.error('Error fetching JSON:', error));
+    }, []);
+
     if (!matches) {
-        return <p>Loading...</p>;
+        return <p>Loading matches...</p>;
+    }
+
+    if (!reserved) {
+        return <p>Loading remains...</p>;
     }
 
     const showForm = () => {
@@ -42,7 +59,6 @@ function Pickup() {
     };
 
     const handlePickup = async (values) => {
-        console.log('Forma Values:', values);
         try {
             const response = await fetch('/pickup', {
                 method: 'POST',
@@ -50,52 +66,61 @@ function Pickup() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(values)
-            });
+            }); 
             if (response.ok) {
                 alert('報名成功');
+                // window.location.reload();
             } else {
-                alert('伺服器錯誤，請稍後再試');
+                // throw new Error(response.)
+                alert(await response.text());
             }
         } catch (error) {
-            console.error('Error saving data:', error);
+            alert('Error saving data:', error.message);
         }
     };
         
+    const handleFinish = (values, id, max) => {
+        values.male = values.male || 0;
+        values.female = values.female || 0;
+        // if values both 0, return error
+        if (!(values.male || values.female)) {
+            alert('請至少報名一人');
+            return;
+        }
+        if (values.male + values.female > max) {
+            alert('報名人數超過上限');
+            return;
+        }
 
-    const handleFinish = (values) => {
         setIsModalOpen(false);
-        values.date = "9/8";
-        values.start_time = "17:30";        
+        values.id = id;
         handlePickup(values);
     };
 
+    let remain = 0;
     return(
         <div>
-            註:男女限制只能報自己的電話姓名
-            無限制可以報多人
             <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
             {matches.map((item, index) => (
+                remain = item.total_people - (reserved[item.id].total_male + reserved[item.id].total_female),
                 (date==='all' || item.date === date) &&
-                    <div>
+                <div>
                     <MatchDiv>
-                        <div>
-                            <MatchInfoCard matchData={item}/>
-                        </div>
+                        <MatchInfoCard matchData={item} reservedData={reserved[item.id]} NeedDate={date==="all"}/>
                         <Button
                             onClick = {showForm}
                             type='primary'
-                            style={{height: '100%', borderRadius: '0 10px 10px 0'}}
+                            disabled={!remain}
                         >
-                            報名
+                            {remain? '報名' : '額滿'}
                         </Button>
                     </MatchDiv>
                     <Modal title="報名資訊" open={isModalOpen} onCancel={closeForm} footer={null}>
-                        { item.limit?
-                            <PickUpLimit handleFinish={handleFinish}/>:
-                            (
-
-                                <PickupUnlimit handleFinish={handleFinish}/>
-                            )
+                        {item.limit?
+                            <PickUpCard handleFinish={(e)=>handleFinish(e, item.id)} 
+                                maleMax={item.ratio.male-reserved[item.id].total_male}
+                                femaleMax={item.ratio.female-reserved[item.id].total_female}/> :
+                            <PickUpCard handleFinish={(e)=>handleFinish(e, item.id, remain)}/>
                         }
                     </Modal>
                 </div>

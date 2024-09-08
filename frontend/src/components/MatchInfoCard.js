@@ -16,9 +16,10 @@ const Container = styled.div`
     }
 `;
 
-function MatchInfoCard({matchData, reservedPerson}) {
+function MatchInfoCard({matchData, reservedData, NeedDate}) {
     return(
         <Container>
+            {NeedDate && <div>{matchData.date}</div>}
             <div>
                 <p>時間:</p>
                 <p>{matchData.start_time}</p>
@@ -31,11 +32,12 @@ function MatchInfoCard({matchData, reservedPerson}) {
                     // <p>男:</p>:
                     <p>男{matchData.ratio.male} 女{matchData.ratio.female}</p> :
                     <p>{matchData.total_people}</p>
-                }           
+                }
             </div>
             <div>
-                <p>剩餘名額:</p>
-                <p>{matchData.total_people}</p>
+                <p>報名人數:</p>
+                {matchData.limit? (<p>男:{reservedData.total_male} 女:{reservedData.total_female}</p>)
+                : <p>{reservedData.total_male+reservedData.total_female}</p>}
             </div>
         </Container>
     )
