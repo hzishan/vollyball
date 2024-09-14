@@ -32,10 +32,10 @@ app.get('/get-reserved', (req, res) => {
             let peoplelist = [];
             for (const j of data[i]){
                 let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2);
-                let num = j.male + j.female;
                     peoplelist.push({
                     name: maskedName,
-                    people_num: num,
+                    male: j.male,
+                    female: j.female
                 });
                 totalFemale += j.female;
                 totalMale += j.male;

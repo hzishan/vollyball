@@ -5,17 +5,19 @@ import dayjs from 'dayjs';
 
 const Container = styled.div`
     div{
-        // height: 30px;
         display: flex;
         align-items: center;
         padding: 4px;
         p{
             margin: 0 10px;
         }
+        input{
+            height: 18px;
+        }
     }
 `;
 
-function MatchSetCard({data, onUpdate}) {
+function MatchSetCard({data, onUpdate, NeedDate}) {
 
     const handleChange = (key, value) => {
         const updatedData = { ...data, [key]: value };
@@ -29,6 +31,7 @@ function MatchSetCard({data, onUpdate}) {
 
     return (
         <Container>
+            {NeedDate && <div>{data.date}</div>}
             <div>
                 <p>時間:</p>
                 <TimePicker

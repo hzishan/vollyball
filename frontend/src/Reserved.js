@@ -127,8 +127,10 @@ function Reserved() {
                     <Modal title="人員名單" open={ModalList===item.id} onCancel={(e)=>setModalList(false)} footer={null}>
                         {reserved[item.id]?.people_list.map((i, index) => (
                             <ListDiv>
+                                {console.log(i)}
                                 <p>{i.name}</p>
-                                <p>{i.people_num}人</p>
+                                <p>男生: {i.male}人</p>
+                                <p>女生: {i.female}人</p>
                             </ListDiv>
                         ))}
                     </Modal>

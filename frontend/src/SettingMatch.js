@@ -105,7 +105,7 @@ function SettingMatch() {
             {data.map((item, index) => (
                 (date==='all' || item.date === date) &&
                 <MatchDiv>
-                    <MatchSetCard data={item} onUpdate={(new_data)=>{handleUpdate(new_data, index)}}/>
+                    <MatchSetCard data={item} onUpdate={(new_data)=>{handleUpdate(new_data, index)}}  NeedDate={date==="all"}/>
                     <Button 
                         onClick={()=>removeMatch(index)}
                         type='primary'
