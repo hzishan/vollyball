@@ -26,7 +26,7 @@ const today = new Date();
 function Pickup() {
     const [matches, setMatches] = useState(null);
     const [reserved, setReserved] = useState(null);
-    const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
+    const [date, setDate] = useState('all');
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -80,8 +80,6 @@ function Pickup() {
     };
         
     const handleFinish = (values, id, max) => {
-        values.male = values.male || 0;
-        values.female = values.female || 0;
         // if values both 0, return error
         if (!(values.male || values.female)) {
             alert('請至少報名一人');

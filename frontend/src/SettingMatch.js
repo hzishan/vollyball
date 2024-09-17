@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Select, TimePicker, Switch, InputNumber, Button} from 'antd';
-import dayjs from 'dayjs';
+import {Button} from 'antd';
 import styled from 'styled-components';
 import DateSelection, {weekDays} from './components/DateSelection';
 import MatchSetCard from './components/MatchSetCard';
@@ -31,14 +30,15 @@ function generateString() {
 
 function SettingMatch() {
     const [data, setData] = useState(null);
-    const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
+    const [date, setDate] = useState('all');
+    // const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
     
 
     const initialData = {
         "id": generateString(),
         "date": date,
-        "start_time": today.getHours()+2 + ":" + today.getMinutes(),
-        "end_time": today.getHours()+5 + ":" + today.getMinutes(),
+        "start_time": String((today.getHours()+2)%24).padStart(2, '0') + ":" + String(today.getMinutes()).padStart(2, '0'),
+        "end_time": String((today.getHours()+5)%24).padStart(2, '0') + ":" + String(today.getMinutes()).padStart(2, '0'),
         "total_people": 18,
         "limit": false,
         "ratio": {
@@ -105,7 +105,10 @@ function SettingMatch() {
             {data.map((item, index) => (
                 (date==='all' || item.date === date) &&
                 <MatchDiv>
-                    <MatchSetCard data={item} onUpdate={(new_data)=>{handleUpdate(new_data, index)}}  NeedDate={date==="all"}/>
+                    <MatchSetCard 
+                        data={item}
+                        onUpdate={(new_data)=>{handleUpdate(new_data, index)}}
+                        NeedDate={date==="all"}/>
                     <Button 
                         onClick={()=>removeMatch(index)}
                         type='primary'

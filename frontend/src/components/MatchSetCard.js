@@ -20,7 +20,7 @@ const Container = styled.div`
 function MatchSetCard({data, onUpdate, NeedDate}) {
 
     const handleChange = (key, value) => {
-        const updatedData = { ...data, [key]: value };
+        const updatedData = { ...data, [key]: value};
         onUpdate(updatedData);
     };
 

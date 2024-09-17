@@ -1,45 +1,9 @@
 [
   {
-    "id": "WEvYR",
-    "date": "9/10",
-    "start_time": "16:19",
-    "end_time": "19:19",
-    "total_people": 18,
-    "limit": false,
-    "ratio": {
-      "male": 12,
-      "female": 6
-    }
-  },
-  {
-    "id": "nBs4O",
-    "date": "9/10",
-    "start_time": "18:20",
-    "end_time": "22:50",
-    "total_people": 18,
-    "limit": true,
-    "ratio": {
-      "male": 12,
-      "female": 6
-    }
-  },
-  {
-    "id": "wbUTL",
-    "date": "9/8",
-    "start_time": "18:00",
-    "end_time": "21:00",
-    "total_people": 18,
-    "limit": false,
-    "ratio": {
-      "male": 12,
-      "female": 6
-    }
-  },
-  {
-    "id": "ar66T",
-    "date": "9/11",
-    "start_time": "18:46",
-    "end_time": "24:44",
+    "id": "k3HVp",
+    "date": "9/17",
+    "start_time": "00:10",
+    "end_time": "03:10",
     "total_people": 18,
     "limit": false,
     "ratio": {
