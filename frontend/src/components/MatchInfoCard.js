@@ -26,12 +26,13 @@ function MatchInfoCard({matchData, reservedData, NeedDate}) {
                 <p>{matchData.end_time}</p>
             </div>
             <div>
-                <p>開放人數:</p>
+                <p>開放人數: </p>
                 {matchData.limit ? 
-                    // <p>男:</p>:
                     <p>男{matchData.ratio.male} 女{matchData.ratio.female}</p> :
                     <p>{matchData.total_people}</p>
                 }
+                <p>備取:</p>
+                <p>{matchData.ready_wait}</p>
             </div>
             <div>
                 <p>報名人數:</p>

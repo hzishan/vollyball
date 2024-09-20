@@ -31,15 +31,15 @@ function generateString() {
 
 function SettingMatch() {
     const [data, setData] = useState(null);
-    const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
-    
+    const [date, setDate] = useState('all');
 
     const initialData = {
         "id": generateString(),
         "date": date,
-        "start_time": today.getHours()+2 + ":" + today.getMinutes(),
-        "end_time": today.getHours()+5 + ":" + today.getMinutes(),
+        "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
+        "end_time": String((today.getHours()+5)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
         "total_people": 18,
+        "ready_wait":6,
         "limit": false,
         "ratio": {
         "male": 12,
@@ -98,9 +98,11 @@ function SettingMatch() {
 
     return (
         <div>
+            {console.log("data",data)}
             <div style={{display:"flex", alignItems:"center"}}>
                 <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
-                <Button onClick={addMatch} type='primary'>增加場次</Button>
+                {(date !== 'all') &&
+                <Button onClick={addMatch} type='primary' >增加場次</Button>}
             </div>
             {data.map((item, index) => (
                 (date==='all' || item.date === date) &&

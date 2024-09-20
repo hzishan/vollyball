@@ -31,14 +31,14 @@ app.get('/get-reserved', (req, res) => {
             let totalFemale = 0;
             let peoplelist = [];
             for (const j of data[i]){
-                let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2);
-                    peoplelist.push({
-                    name: maskedName,
-                    male: j.male,
-                    female: j.female
+                // let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2);
+                peoplelist.push({
+                    name: j.name,
+                    maleNames: j.maleNames,
+                    femaleNames: j.femaleNames
                 });
-                totalFemale += j.female;
-                totalMale += j.male;
+                totalFemale += j.femaleNames.length;
+                totalMale += j.maleNames.length;
             }
             result[i] = {
                 people_list: peoplelist,
@@ -160,7 +160,6 @@ app.post('/pickup', (req, res) => {
         }
         
         const result = matches.find(item => item.id === updatedData.id);
-        const Max_people = result.total_people;
 
         const filename = './reserved.json';
         fs.readFile(filename, 'utf8', (err, data) => {
@@ -178,14 +177,14 @@ app.post('/pickup', (req, res) => {
             }
 
             // Calculate the current total reservations (male + female)
-            const currentMale = jsonLocal[updatedData.id].reduce((sum, res) => sum + (res.male || 0), 0) || 0;
-            const currentFemale = jsonLocal[updatedData.id].reduce((sum, res) => sum + (res.female || 0), 0) || 0;
+            const currentMale = jsonLocal[updatedData.id].reduce((sum, res) => sum + res.maleNames.length, 0) || 0;
+            const currentFemale = jsonLocal[updatedData.id].reduce((sum, res) => sum + res.femaleNames.length, 0) || 0;
 
-            const newTotal = currentMale + currentFemale + updatedData.male + updatedData.female;
+            const newTotal = currentMale + currentFemale + updatedData.maleNames.length + updatedData.femaleNames.length;
 
             // If new total exceeds total_people, return an error
-            if (newTotal > Max_people) {
-                return res.status(400).send(`報名人數已滿,目前總報名人數: ${Max_people}, 請重新整理頁面.`);
+            if (newTotal > result.total_people + result.ready_wait) {
+                return res.status(400).send(`報名人數已滿,目前總報名人數: ${result.total_people}, 請重新整理頁面.`);
             }
             
             // 找到對應的 match id  jsonLocal='id':[]
@@ -195,16 +194,16 @@ app.post('/pickup', (req, res) => {
                 jsonLocal[updatedData.id] = [
                     {
                         name: updatedData.name,
-                        male: updatedData.male,
-                        female: updatedData.female,
+                        maleNames: updatedData.maleNames,
+                        femaleNames: updatedData.femaleNames,
                         phone: updatedData.phone
                     }
                 ]
             } else {
                 jsonLocal[updatedData.id].push({
                     name: updatedData.name,
-                    male: updatedData.male,
-                    female: updatedData.female,
+                    maleNames: updatedData.maleNames,
+                    femaleNames: updatedData.femaleNames,
                     phone: updatedData.phone
                 });
             }

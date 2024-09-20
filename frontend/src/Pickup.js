@@ -21,13 +21,11 @@ const MatchDiv = styled.div`
     }
 `;
 
-const today = new Date();
-
 function Pickup() {
     const [matches, setMatches] = useState(null);
     const [reserved, setReserved] = useState(null);
-    const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [date, setDate] = useState('all');
+    const [modalInfo, setModalInfo] = useState({ isOpen: false, currentItem: null }); // 控制每個比賽的 modal 狀態
 
     useEffect(() => {
         fetch('/get-matches')
@@ -43,19 +41,16 @@ function Pickup() {
             .catch(error => console.error('Error fetching JSON:', error));
     }, []);
 
-    if (!matches) {
-        return <p>Loading matches...</p>;
+    if (!matches || !reserved) {
+        return <p>Loading...</p>;
     }
 
-    if (!reserved) {
-        return <p>Loading remains...</p>;
-    }
+    const showForm = (item) => {
+        setModalInfo({ isOpen: true, currentItem: item });
+    };
 
-    const showForm = () => {
-        setIsModalOpen(true);
-    }
     const closeForm = () => {
-        setIsModalOpen(false);
+        setModalInfo({ isOpen: false, currentItem: null });
     };
 
     const handlePickup = async (values) => {
@@ -66,67 +61,88 @@ function Pickup() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(values)
-            }); 
+            });
             if (response.ok) {
                 alert('報名成功');
-                // window.location.reload();
             } else {
-                // throw new Error(response.)
                 alert(await response.text());
             }
         } catch (error) {
             alert('Error saving data:', error.message);
         }
     };
-        
-    const handleFinish = (values, id, max) => {
-        values.male = values.male || 0;
-        values.female = values.female || 0;
-        // if values both 0, return error
-        if (!(values.male || values.female)) {
+
+    const handleFinish = (values, id, max, ready_wait) => {
+        // console.log("limit",values, id, max, ready_wait);
+        const total = values.maleNames.length + values.femaleNames.length;
+
+        if (total === 0) {
             alert('請至少報名一人');
             return;
         }
-        if (values.male + values.female > max) {
+        else if (total > max + ready_wait) {
             alert('報名人數超過上限');
             return;
         }
 
-        setIsModalOpen(false);
-        values.id = id;
-        handlePickup(values);
+        closeForm();
+        handlePickup({ ...values, id });
     };
 
-    let remain = 0;
-    return(
+    return (
         <div>
-            <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
-            {matches.map((item, index) => (
-                remain = item.total_people - (reserved[item.id].total_male + reserved[item.id].total_female),
-                (date==='all' || item.date === date) &&
-                <div>
-                    <MatchDiv>
-                        <MatchInfoCard matchData={item} reservedData={reserved[item.id]} NeedDate={date==="all"}/>
-                        <Button
-                            onClick = {showForm}
-                            type='primary'
-                            disabled={!remain}
-                        >
-                            {remain? '報名' : '額滿'}
-                        </Button>
-                    </MatchDiv>
-                    <Modal title="報名資訊" open={isModalOpen} onCancel={closeForm} footer={null}>
-                        {item.limit?
-                            <PickUpCard handleFinish={(e)=>handleFinish(e, item.id)} 
-                                maleMax={item.ratio.male-reserved[item.id].total_male}
-                                femaleMax={item.ratio.female-reserved[item.id].total_female}/> :
-                            <PickUpCard handleFinish={(e)=>handleFinish(e, item.id, remain)}/>
-                        }
-                    </Modal>
-                </div>
-            ))}
+            <DateSelection onChange={(e) => setDate(e.split(' ')[0])} />
+            {matches.map((item) => {
+                const reservedItem = reserved[item.id];
+                const remain = item.total_people - (reservedItem.total_male + reservedItem.total_female);
+                const totalReserved = reservedItem.total_male + reservedItem.total_female;
+                const totalCapacity = item.total_people + item.ready_wait;
+
+                return (date === 'all' || item.date === date) && (
+                    <div key={item.id}>
+                        <MatchDiv>
+                            <MatchInfoCard matchData={item} reservedData={reservedItem} NeedDate={date === "all"} />
+                            <Button
+                                onClick={() => showForm(item)}
+                                type = 'primary'
+                                disabled={totalReserved >= totalCapacity}
+                                danger = {remain>0? false : true}
+                            >
+                                {remain > 0 ? '報名' : totalReserved < totalCapacity ? '備取' : '額滿'}
+                            </Button>
+                        </MatchDiv>
+                    </div>
+                );
+            })}
+            {modalInfo.isOpen && (
+                <Modal
+                    title="報名資訊"
+                    open={modalInfo.isOpen}
+                    onCancel={closeForm}
+                    footer={null}
+                >
+                    {modalInfo.currentItem?.limit ? (
+                        <PickUpCard
+                            handleFinish={(values) => handleFinish(values,
+                                modalInfo.currentItem.id,
+                                modalInfo.currentItem.total_people - (reserved[modalInfo.currentItem.id].total_male + reserved[modalInfo.currentItem.id].total_female),
+                                modalInfo.currentItem.ready_wait)}
+                            maleMax={modalInfo.currentItem.ratio.male + modalInfo.currentItem.ready_wait - reserved[modalInfo.currentItem.id].total_male}
+                            femaleMax={modalInfo.currentItem.ratio.female + modalInfo.currentItem.ready_wait - reserved[modalInfo.currentItem.id].total_female}
+                        />
+                    ) : (
+                        <PickUpCard
+                            handleFinish={(values) => handleFinish(values,
+                                modalInfo.currentItem.id,
+                                modalInfo.currentItem.total_people - (reserved[modalInfo.currentItem.id].total_male + reserved[modalInfo.currentItem.id].total_female),
+                                modalInfo.currentItem.ready_wait)}
+                        />
+                    )}
+                </Modal>
+            )}
         </div>
     );
 }
+
 
 export default Pickup;

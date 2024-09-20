@@ -2,18 +2,41 @@ import React, { useEffect, useState } from 'react';
 import styled from "styled-components";
 import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
 
+const PersonDiv = styled.div`
+    display: flex;
+    align-items: center;
+    width: 180px;
+`;
 
 export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
+    const [maleNames, setMaleNames] = useState(['']);
+    const [femaleNames, setFemaleNames] = useState(['']);
     const handleFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
 
+    const rmMale = (index) => {
+        setMaleNames(maleNames.filter((_, i) => i !== index));
+    }
+    
+    const rmFemale = (index) => {
+        setFemaleNames(femaleNames.filter((_, i) => i !== index));
+    }
+
     return (
         <Form
-            onFinish={handleFinish}
-            onFinishFailed={handleFinishFailed}>
+            onFinish={(values)=>{
+                const filteredMaleNames = maleNames.filter(name => name !== '');
+                const filteredFemaleNames = femaleNames.filter(name => name !== '');
+                const formDate = {...values, 
+                    maleNames: filteredMaleNames,
+                    femaleNames: filteredFemaleNames};
+                handleFinish(formDate);
+            }}
+            onFinishFailed={handleFinishFailed}
+            >
             <Form.Item
-                label="姓名"
+                label="報名人"
                 name="name"
                 rules={[
                     {
@@ -24,7 +47,7 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
             >
                 <Input type="text" />
             </Form.Item>
-            <Form.Item 
+            {/* <Form.Item 
                 style={{width:120, display:'flex'}} 
                 label="性別"
                 required>
@@ -38,8 +61,54 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                     <InputNumber min={0} max={femaleMax} defaultValue={0} style={{marginRight:'4px'}}/>
                     </Form.Item>
                 </div>
+            </Form.Item> */}
+            <Form.Item
+                style={{ width: '100%', display: 'flex' }} 
+                label="新增人員">
+                <div style={{height:30, width: '100%', display:'flex'}}>
+                    <PersonDiv style={{marginRight:'4px'}}>
+                        <p style={{marginRight:'4px'}}>男生</p>
+                        <Button onClick={() => {setMaleNames([...maleNames, ''])}}>+</Button>
+                    </PersonDiv>
+                    <PersonDiv>
+                        <p style={{marginRight:'4px'}}>女生</p>
+                        <Button onClick={() => {setFemaleNames([...femaleNames, ''])}}>+</Button>
+                    </PersonDiv>
+                </div>
+                <div style={{width: '100%', display: 'flex'}}>
+                    <div style={{marginRight:'4px'}}>
+                    {maleNames.map((name, index) => (
+                        <PersonDiv>
+                            <Input
+                                value={name}
+                                onChange={(e) => {
+                                    const newMaleNames = [...maleNames];
+                                    newMaleNames[index] = e.target.value;
+                                    setMaleNames(newMaleNames);
+                                }}
+                            />
+                            <Button onClick={()=>rmMale(index)}
+                                disabled={maleNames.length<=1? true:false}>x</Button>
+                        </PersonDiv>
+                    ))}
+                    </div>
+                    <div>
+                    {femaleNames.map((name, index) => (
+                        <PersonDiv >
+                            <Input key={index} type="text"
+                                onChange={(e) => {
+                                    const newFemaleNames = [...femaleNames];
+                                    newFemaleNames[index] = e.target.value;
+                                    setFemaleNames(newFemaleNames);
+                                }} 
+                            />
+                            <Button onClick={()=>rmFemale(index)}
+                                disabled={femaleNames.length<=1? true:false}>x</Button>
+                        </PersonDiv>
+                    ))}
+                    </div>
+                </div>
             </Form.Item>
-
             <Form.Item
                 label="手機"
                 name="phone"

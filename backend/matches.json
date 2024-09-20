@@ -1,50 +1,54 @@
 [
   {
-    "id": "WEvYR",
-    "date": "9/10",
-    "start_time": "16:19",
-    "end_time": "19:19",
-    "total_people": 18,
+    "id": "f25Es",
+    "date": "9/22",
+    "start_time": "01:18",
+    "end_time": "04:18",
+    "total_people": 4,
+    "ready_wait": 0,
     "limit": false,
     "ratio": {
-      "male": 12,
-      "female": 6
+      "male": 4,
+      "female": 0
     }
   },
   {
-    "id": "nBs4O",
-    "date": "9/10",
-    "start_time": "18:20",
-    "end_time": "22:50",
-    "total_people": 18,
+    "id": "dG3M6",
+    "date": "9/21",
+    "start_time": "01:18",
+    "end_time": "04:18",
+    "total_people": 4,
+    "ready_wait": 2,
     "limit": true,
     "ratio": {
-      "male": 12,
-      "female": 6
+      "male": 2,
+      "female": 2
     }
   },
   {
-    "id": "wbUTL",
-    "date": "9/8",
-    "start_time": "18:00",
-    "end_time": "21:00",
-    "total_people": 18,
+    "id": "CPlFO",
+    "date": "9/20",
+    "start_time": "01:18",
+    "end_time": "04:18",
+    "total_people": 2,
+    "ready_wait": 1,
     "limit": false,
     "ratio": {
-      "male": 12,
-      "female": 6
+      "male": 2,
+      "female": 0
     }
   },
   {
-    "id": "ar66T",
-    "date": "9/11",
-    "start_time": "18:46",
-    "end_time": "24:44",
-    "total_people": 18,
-    "limit": false,
+    "id": "7OdeP",
+    "date": "9/24",
+    "start_time": "04:18",
+    "end_time": "10:23",
+    "total_people": 4,
+    "ready_wait": 2,
+    "limit": true,
     "ratio": {
-      "male": 12,
-      "female": 6
+      "male": 2,
+      "female": 2
     }
   }
 ]
