@@ -3,6 +3,7 @@ import DateSelection from './components/DateSelection';
 import styled from "styled-components";
 import { Button, Form, Input, Modal } from "antd";
 import MatchInfoCard from './components/MatchInfoCard';
+import ReservedCheck, { ReservedModify } from './components/FormObj';
 
 const MatchDiv = styled.div`
     border: 1px solid black;
@@ -35,9 +36,11 @@ const today = new Date();
 function Reserved() {
     const [matches, setMatches] = useState(null);
     const [reserved, setReserved] = useState(null);
-    const [date, setDate] = useState(today.getMonth()+1 + '/' + today.getDate());
+    const [date, setDate] = useState('all');
     const [ModalList, setModalList] = useState(false);
     const [ModalCancel, setModalCancel] = useState(null);
+    const [ModalModify, setModalModify] = useState(null);
+    const [formData, setFormData] = useState(null);
 
     useEffect(() => {
         fetch('/get-matches')
@@ -62,16 +65,26 @@ function Reserved() {
     }
 
     const ShowList = (id) => {
+        setModalCancel(false);
+        setModalModify(false);
         setModalList(id);
     }
 
-    const ShowCancel = () => {
+    const ShowCheck = () => {
+        setModalModify(false);
         setModalCancel(true);
     }
 
-    const handleCancel = async(values) => {
+    const ShowModify = (values) => {
+        setModalCancel(false);
+        setModalModify(true);
+        setFormData(values);
+    }
+
+    const handleCheckInfo = async(values, id) => {
+        values.id = id;
         try {
-            const response = await fetch('/cancel-reservation', {
+            const response = await fetch('/check-reservation', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -79,7 +92,12 @@ function Reserved() {
                 body: JSON.stringify(values),
             });
             if (response.ok) {
-                alert('已取消報名');
+                if (values.mode === 'delete') {
+                    handleUpdate(values);
+                }
+                else if (values.mode === 'modify') {
+                    ShowModify(values);
+                }
             } else {
                 alert(await response.text());
             }
@@ -88,18 +106,40 @@ function Reserved() {
         }
     };
 
-    const handleFinish = (values, id) => {
-        values.id = id;
-        // console.log('Received values:', values);
-        handleCancel(values);
-        setModalCancel(false);
+    const handleModify = (e) => {
+        const newData = {...formData, ...e};
+        handleUpdate(newData);
+        setModalModify(false);
+    };
+
+    const handleUpdate = async(values) => {
+        try {
+            const response = await fetch('/modify-reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            });
+            if (response.ok) {
+                if (values.mode === 'delete') {
+                    alert('取消成功');
+                }
+                else if (values.mode === 'modify') {
+                    alert('修改成功');
+                }
+            } else {
+                alert(await response.text());
+            }
+        } catch (error) {
+            alert('Error saving data:', error.message);
+        }
     };
 
     let matchDateTime, month, day;
-    
     return (
         <div>
-            <p>註: 24小時前無法取消報名</p>
+            <p>註: 24小時前無法修改報名</p>
             <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
             {matches.map((item, index) => (
                 [month, day] = item.date.split('/'),
@@ -116,61 +156,34 @@ function Reserved() {
                                 人員名單
                             </Button>
                             <Button
-                                onClick = {ShowCancel}
+                                onClick = {ShowCheck}
                                 type='primary'
                                 style={{borderRadius:"0 0 9px 0"}}
                                 disabled={matchDateTime-new Date() < 24*60*60*1000}>
-                                取消報名
+                                修改報名
                             </Button>
                         </BtnDiv>
-                    </MatchDiv>
-                    <Modal title="人員名單" open={ModalList===item.id} onCancel={(e)=>setModalList(false)} footer={null}>
+                    </MatchDiv> 
+                    <Modal title="人員名單" open={ModalList===item.id} onCancel={()=>setModalList(false)} footer={null}>
                         {reserved[item.id]?.people_list.map((i, index) => (
                             <ListDiv>
-                                {console.log(i)}
                                 <p>{i.name}</p>
                                 <p>男生: {i.male}人</p>
                                 <p>女生: {i.female}人</p>
                             </ListDiv>
                         ))}
                     </Modal>
-                    <Modal title="取消報名" open={ModalCancel} onCancel={(e)=>setModalCancel(false)} footer={null}>
-                        <Form onFinish={(e)=>handleFinish(e, item.id)}>
-                            <Form.Item
-                                label="姓名"
-                                name="name"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '請輸入姓名!',
-                                    },
-                                ]}
-                            >
-                                <Input type="text" />
-                            </Form.Item>
-                            <Form.Item
-                                label="手機"
-                                name="phone"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: '請輸入手機號碼!',
-                                    },
-                                    {
-                                        pattern: /^09\d{8}$/,
-                                        message: '手機號碼格式不正確，請輸入 09xx-xxx-xxx 格式!',
-                                    },
-                                ]}
-                            >
-                                <Input type="text" />
-                            </Form.Item>
-                            <Button type="primary" 
-                                htmlType="submit"
-                                style={{ width: '100%'}}
-                                >
-                                    送出
-                            </Button>
-                        </Form>
+                    <Modal title="登記資訊" open={ModalCancel} onCancel={()=>setModalCancel(false)} footer={null}>
+                        <ReservedCheck 
+                            handleFinish={(e)=>handleCheckInfo(e, item.id)}/>
+                    </Modal>
+                    <Modal title="修改人數" open={ModalModify} onCancel={()=>setModalModify(false)} footer={null}>
+                        <ReservedModify 
+                            handleFinish={(e)=>{handleModify(e)}}
+                            returnBack = {()=>ShowCheck()}
+                            data = {formData? reserved[formData.id]?.people_list.find(p => p.name === formData.name) :{male:0,female:0}}
+                            maleRemain={item.ratio.male-reserved[item.id].total_male}
+                            femaleRemain={item.ratio.female-reserved[item.id].total_female}/>
                     </Modal>
                 </div>
             ))}

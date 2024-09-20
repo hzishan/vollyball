@@ -30,7 +30,7 @@ export default function DateSelection({onChange}) {
             <p style={{marginRight:"10px"}}>日期:</p>
             <Select
                 style={{width:"100px"}}
-                defaultValue={dateOptions[0]}
+                defaultValue={"all"}
                 onChange={onChange}
                 options={dateOptions.map(item => ({value: item}))}
             />

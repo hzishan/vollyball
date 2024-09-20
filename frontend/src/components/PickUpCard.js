@@ -14,6 +14,10 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
     const handleFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
+    const initialValues = {
+        male: 0,
+        female: 0,
+    };
 
     const rmMale = (index) => {
         setMaleNames(maleNames.filter((_, i) => i !== index));
@@ -54,11 +58,11 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                 <div style={{height:30 ,width:150, display:'flex', alignItems:'center'}}>
                     <p style={{marginRight:'4px'}}>男:</p>
                     <Form.Item name="male" noStyle>
-                    <InputNumber min={0} max={maleMax} defaultValue={0} style={{marginRight:'4px'}}/>
+                    <InputNumber min={0} max={maleMax} style={{marginRight:'4px'}}/>
                     </Form.Item>
                     <p style={{marginRight:'4px'}}>女:</p>
                     <Form.Item name="female" noStyle>
-                    <InputNumber min={0} max={femaleMax} defaultValue={0} style={{marginRight:'4px'}}/>
+                    <InputNumber min={0} max={femaleMax} style={{marginRight:'4px'}}/>
                     </Form.Item>
                 </div>
             </Form.Item> */}

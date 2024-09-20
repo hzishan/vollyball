@@ -31,7 +31,7 @@ app.get('/get-reserved', (req, res) => {
             let totalFemale = 0;
             let peoplelist = [];
             for (const j of data[i]){
-                // let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2);
+                // let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2); // 如果要遮蔽名字
                 peoplelist.push({
                     name: j.name,
                     maleNames: j.maleNames,
@@ -50,7 +50,7 @@ app.get('/get-reserved', (req, res) => {
     });
 });
 
-app.post('/cancel-reservation', (req, res) => {
+app.post('/check-reservation', (req, res) => {
     const updatedData = req.body;
     const filename = './reserved.json';
     
@@ -79,17 +79,82 @@ app.post('/cancel-reservation', (req, res) => {
         else if (jsonLocal[updatedData.id][result].phone !== updatedData.phone) {
             return res.status(400).send('電話號碼不符合');
         }
+        res.send('資料正確');
+    });
+});
 
-        // delete the reservation
-        jsonLocal[updatedData.id].splice(result, 1);
+app.post('/modify-reservation', (req, res) => {
+    const updatedData = req.body;
 
-        fs.writeFile(filename, JSON.stringify(jsonLocal, null, 2), (err) => {
-            if (err) {
-                console.error('Error writing to file', err);
-                return res.status(500).send('Error saving data');
-            }
-            res.send('Data saved successfully');
-        });
+    const matchFile = './matches.json';
+    fs.readFile(matchFile, 'utf8', (err, matchesData) => {
+        if (err) {
+            console.error('Error reading file', err);
+            return res.status(500).send('Error reading data');
+        }
+
+        let matches;
+        try{
+            matches = JSON.parse(matchesData);
+        } catch (parseErr) {
+            console.error('Error parsing JSON', parseErr);
+            return res.status(500).send('Error parsing data');
+        }
+        const now = new Date();
+        const nowTime = now.getHours() + ':' + now.getMinutes();
+        const nowDate = now.getMonth() + 1 + '/' + now.getDate();
+        const match = matches.find(item => item.id === updatedData.id);
+
+        if (!match) {
+            return res.status(404).send('Match not found');
+        }
+    
+        const [matchMonth, matchDay] = match.date.split('/');
+        const [matchHour, matchMinute] = match.start_time.split(':');
+        
+        // 創建比賽開始時間的 Date 對象
+        const matchDateTime = new Date(now.getFullYear(), matchMonth - 1, matchDay, matchHour, matchMinute);
+    
+        // 計算時間差
+        const timeDifference = matchDateTime - now;
+    
+        // 檢查是否小於24小時
+        if (timeDifference < 24 * 60 * 60 * 1000) { // 小於24小時
+            return res.status(400).send('小於24H不能更改預約資料');
+        }
+        else{
+            const filename = './reserved.json';
+            fs.readFile(filename, 'utf8', (err, data) => {
+                let jsonLocal;
+                try {
+                    jsonLocal = JSON.parse(data);
+                } catch (parseErr) {
+                    console.error('Error parsing JSON', parseErr);
+                    return res.status(500).send('Error parsing data');
+                }
+                const result = jsonLocal[updatedData.id].findIndex(item => item.name === updatedData.name);
+                console.log(result);
+                if (result === -1) {
+                    return res.status(400).send('尚未有您的預約資料');
+                }
+                else {
+                    if (updatedData.mode==='modify') {
+                        jsonLocal[updatedData.id][result].male = updatedData.male;
+                        jsonLocal[updatedData.id][result].female = updatedData.female;
+                    }
+                    else if (updatedData.mode==='delete') { // mode==='cancel' delete the reservation
+                        jsonLocal[updatedData.id].splice(result, 1);
+                    }
+                }
+                fs.writeFile(filename, JSON.stringify(jsonLocal, null, 2), (err) => {
+                    if (err) {
+                        console.error('Error writing to file', err);
+                        return res.status(500).send('Error saving data');
+                    }
+                    res.send('已更新預約');
+                });
+            });
+        }
     });
 });
 
@@ -176,6 +241,11 @@ app.post('/pickup', (req, res) => {
                 return res.status(500).send('Error parsing data');
             }
 
+            // check you haven't reserved
+            const result = jsonLocal[updatedData.id].findIndex(item => (item.name === updatedData.name && item.phone === updatedData.phone));
+            if (result !== -1) {
+                return res.status(400).send('您已經預約過了，請使用修改功能');
+            }
             // Calculate the current total reservations (male + female)
             const currentMale = jsonLocal[updatedData.id].reduce((sum, res) => sum + res.maleNames.length, 0) || 0;
             const currentFemale = jsonLocal[updatedData.id].reduce((sum, res) => sum + res.femaleNames.length, 0) || 0;

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Select, TimePicker, Switch, InputNumber, Button} from 'antd';
-import dayjs from 'dayjs';
+import {Button} from 'antd';
 import styled from 'styled-components';
 import DateSelection, {weekDays} from './components/DateSelection';
 import MatchSetCard from './components/MatchSetCard';
@@ -32,7 +31,6 @@ function generateString() {
 function SettingMatch() {
     const [data, setData] = useState(null);
     const [date, setDate] = useState('all');
-
     const initialData = {
         "id": generateString(),
         "date": date,
@@ -107,7 +105,10 @@ function SettingMatch() {
             {data.map((item, index) => (
                 (date==='all' || item.date === date) &&
                 <MatchDiv>
-                    <MatchSetCard data={item} onUpdate={(new_data)=>{handleUpdate(new_data, index)}}  NeedDate={date==="all"}/>
+                    <MatchSetCard 
+                        data={item}
+                        onUpdate={(new_data)=>{handleUpdate(new_data, index)}}
+                        NeedDate={date==="all"}/>
                     <Button 
                         onClick={()=>removeMatch(index)}
                         type='primary'
