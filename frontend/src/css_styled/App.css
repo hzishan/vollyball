@@ -29,3 +29,9 @@
     width: 48%;
     margin-right: 2%;
 }
+
+#modal-title{
+    p{
+        padding-right: 8px;
+    }
+}

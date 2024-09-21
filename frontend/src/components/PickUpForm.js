@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from "styled-components";
-import { Button, Form, Input, InputNumber, Modal, Select } from "antd";
+import { Button, Form, Input} from "antd";
 
 const PersonDiv = styled.div`
     display: flex;
@@ -8,15 +8,12 @@ const PersonDiv = styled.div`
     width: 180px;
 `;
 
-export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
+export default function PickUpForm({handleFinish}) {
     const [maleNames, setMaleNames] = useState(['']);
     const [femaleNames, setFemaleNames] = useState(['']);
+
     const handleFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
-    };
-    const initialValues = {
-        male: 0,
-        female: 0,
     };
 
     const rmMale = (index) => {
@@ -39,18 +36,6 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
             }}
             onFinishFailed={handleFinishFailed}
             >
-            <Form.Item
-                label="報名人"
-                name="name"
-                rules={[
-                    {
-                        required: true,
-                        message: '請輸入姓名!',
-                    },
-                ]}
-            >
-                <Input type="text" />
-            </Form.Item>
             {/* <Form.Item 
                 style={{width:120, display:'flex'}} 
                 label="性別"
@@ -67,9 +52,9 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                 </div>
             </Form.Item> */}
             <Form.Item
-                style={{ width: '100%', display: 'flex' }} 
+                style={{ width: '100%', display: 'flex'}} 
                 label="新增人員">
-                <div style={{height:30, width: '100%', display:'flex'}}>
+                <div style={{height:30, width: '100%', display:'flex', paddingBottom:'4px'}}>
                     <PersonDiv style={{marginRight:'4px'}}>
                         <p style={{marginRight:'4px'}}>男生</p>
                         <Button onClick={() => {setMaleNames([...maleNames, ''])}}>+</Button>
@@ -81,6 +66,7 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                 </div>
                 <div style={{width: '100%', display: 'flex'}}>
                     <div style={{marginRight:'4px'}}>
+                    <PersonDiv></PersonDiv>
                     {maleNames.map((name, index) => (
                         <PersonDiv>
                             <Input
@@ -91,8 +77,7 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                                     setMaleNames(newMaleNames);
                                 }}
                             />
-                            <Button onClick={()=>rmMale(index)}
-                                disabled={maleNames.length<=1? true:false}>x</Button>
+                            <Button onClick={()=>rmMale(index)}>x</Button>
                         </PersonDiv>
                     ))}
                     </div>
@@ -106,12 +91,23 @@ export default function PickUpCard({handleFinish, maleMax, femaleMax}) {
                                     setFemaleNames(newFemaleNames);
                                 }} 
                             />
-                            <Button onClick={()=>rmFemale(index)}
-                                disabled={femaleNames.length<=1? true:false}>x</Button>
+                            <Button onClick={()=>rmFemale(index)}>x</Button>
                         </PersonDiv>
                     ))}
                     </div>
                 </div>
+            </Form.Item>
+            <Form.Item
+                label="報名人"
+                name="name"
+                rules={[
+                    {
+                        required: true,
+                        message: '請輸入姓名!',
+                    },
+                ]}
+            >
+                <Input type="text" />
             </Form.Item>
             <Form.Item
                 label="手機"

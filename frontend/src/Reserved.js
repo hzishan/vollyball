@@ -3,7 +3,9 @@ import DateSelection from './components/DateSelection';
 import styled from "styled-components";
 import { Button, Form, Input, Modal } from "antd";
 import MatchInfoCard from './components/MatchInfoCard';
-import ReservedCheck, { ReservedModify } from './components/FormObj';
+import ReservedCheck, { ReservedModify } from './components/ModifyFormObj';
+import { modalGlobalConfig } from 'antd/es/modal/confirm';
+import ReservedCard from './components/ReservedCard';
 
 const MatchDiv = styled.div`
     border: 1px solid black;
@@ -24,71 +26,51 @@ const BtnDiv = styled.div`
     }
 `;
 
-const ListDiv = styled.div`
-    display: flex;
-    p {
-        margin-right: 4px;
-    }
-`;
 
-const today = new Date();
  
 function Reserved() {
     const [matches, setMatches] = useState(null);
     const [reserved, setReserved] = useState(null);
     const [date, setDate] = useState('all');
-    const [ModalList, setModalList] = useState(false);
-    const [ModalCancel, setModalCancel] = useState(null);
-    const [ModalModify, setModalModify] = useState(null);
-    const [formData, setFormData] = useState(null);
+    const [modalInfo, setModalInfo] = useState({ 
+        listStatus: false,
+        checkStatus: false,
+        modifyStatus: false,
+        currentItem: null,
+        isCheck: false});
+    const [checkValues, setChcekValues] = useState(null);
 
     useEffect(() => {
-        fetch('/get-matches')
-            .then((response) => response.json())
-            .then((data) => setMatches(data))
-            .catch(error => console.error('Error fetching JSON:', error));        
+        const fetchData = async () => {
+            try {
+                const [matchesResponse, reservedResponse] = await Promise.all([
+                    fetch('/get-matches').then(res => res.json()),
+                    fetch('/get-reserved').then(res => res.json())
+                ]);
+                setMatches(matchesResponse);
+                setReserved(reservedResponse);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
     }, []);
 
-    useEffect(() => {
-        fetch('/get-reserved')
-            .then((response) => response.json())
-            .then((data) => setReserved(data))
-            .catch(error => console.error('Error fetching JSON:', error));
-    }, []);
+    if (!matches || !reserved) return <p>Loading data...</p>;
 
-    if (!matches) {
-        return <p>Loading matches...</p>;
-    }
-
-    if (!reserved) {
-        return <p>Loading reservedData...</p>;
-    }
-
-    const ShowList = (id) => {
-        setModalCancel(false);
-        setModalModify(false);
-        setModalList(id);
-    }
-
-    const ShowCheck = () => {
-        setModalModify(false);
-        setModalCancel(true);
-    }
-
-    const ShowModify = (values) => {
-        setModalCancel(false);
-        setModalModify(true);
-        setFormData(values);
-    }
+    const handleModal = (type, item = null) => {
+        setModalInfo({ listStatus: type === 'list',
+            checkStatus: type === 'check',
+            modifyStatus: type === 'modify',
+            currentItem: item });
+    };
 
     const handleCheckInfo = async(values, id) => {
         values.id = id;
         try {
             const response = await fetch('/check-reservation', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(values),
             });
             if (response.ok) {
@@ -96,7 +78,13 @@ function Reserved() {
                     handleUpdate(values);
                 }
                 else if (values.mode === 'modify') {
-                    ShowModify(values);
+                    await(setChcekValues(values));
+                    setModalInfo((prev)=>({
+                        ...prev,
+                        checkStatus: false,
+                        modifyStatus: true,
+                        isCheck: true,
+                    }));
                 }
             } else {
                 alert(await response.text());
@@ -104,30 +92,21 @@ function Reserved() {
         } catch (error) {
             alert('Error saving data:', error.message);
         }
-    };
-
-    const handleModify = (e) => {
-        const newData = {...formData, ...e};
-        handleUpdate(newData);
-        setModalModify(false);
     };
 
     const handleUpdate = async(values) => {
+        console.log("update values",values);
+        if (!(values.malaNames && values.femaleNames)) {
+            values.mode = 'delete';
+        }
         try {
             const response = await fetch('/modify-reservation', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(values),
             });
             if (response.ok) {
-                if (values.mode === 'delete') {
-                    alert('取消成功');
-                }
-                else if (values.mode === 'modify') {
-                    alert('修改成功');
-                }
+                alert(values.mode === 'delete' ? '取消成功' : '修改成功');
             } else {
                 alert(await response.text());
             }
@@ -136,58 +115,78 @@ function Reserved() {
         }
     };
 
-    let matchDateTime, month, day;
     return (
         <div>
             <p>註: 24小時前無法修改報名</p>
             <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
-            {matches.map((item, index) => (
-                [month, day] = item.date.split('/'),
-                matchDateTime = new Date(`${new Date().getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${item.start_time}:00`),
-                (date==='all' || item.date === date) &&
-                <div>
+            {matches.map((item) => {
+                const matchDateTime = new Date(`${new Date().getFullYear()}-${item.date.replace('/', '-')}-${item.start_time}:00`);
+                const reservedData = reserved[item.id] || {};
+                const canModify = matchDateTime - new Date() >= 24 * 60 * 60 * 1000 && (reservedData.total_female || reservedData.total_male);
+
+                return (date==='all' || item.date === date) && (
+                <div key={item.id}>
                     <MatchDiv>
-                        <MatchInfoCard matchData={item} reservedData={reserved[item.id]} NeedDate={date==="all"}/>
+                        <MatchInfoCard matchData={item} reservedData={reservedData} NeedDate={date==="all"}/>
                         <BtnDiv>
                             <Button
-                                onClick = {()=>ShowList(item.id)}
+                                onClick = {()=>handleModal("list",item)}
                                 type='primary'
-                                style={{borderRadius:"0 9px 0 0"}}>
-                                人員名單
+                                style={{borderRadius:"0 9px 0 0"}}
+                                disabled = {!canModify}
+                                >
+                                {(reservedData.total_female||reservedData.total_male)? "已報人員":"目前沒人"}
                             </Button>
                             <Button
-                                onClick = {ShowCheck}
+                                onClick = {()=>handleModal("check",item)}
                                 type='primary'
                                 style={{borderRadius:"0 0 9px 0"}}
-                                disabled={matchDateTime-new Date() < 24*60*60*1000}>
+                                disabled={(matchDateTime-new Date() < 24*60*60*1000) ||
+                                    !(reservedData.total_female||reservedData.total_male)} >
                                 修改報名
                             </Button>
                         </BtnDiv>
-                    </MatchDiv> 
-                    <Modal title="人員名單" open={ModalList===item.id} onCancel={()=>setModalList(false)} footer={null}>
-                        {reserved[item.id]?.people_list.map((i, index) => (
-                            <ListDiv>
-                                <p>{i.name}</p>
-                                <p>男生: {i.male}人</p>
-                                <p>女生: {i.female}人</p>
-                            </ListDiv>
-                        ))}
-                    </Modal>
-                    <Modal title="登記資訊" open={ModalCancel} onCancel={()=>setModalCancel(false)} footer={null}>
-                        <ReservedCheck 
-                            handleFinish={(e)=>handleCheckInfo(e, item.id)}/>
-                    </Modal>
-                    <Modal title="修改人數" open={ModalModify} onCancel={()=>setModalModify(false)} footer={null}>
-                        <ReservedModify 
-                            handleFinish={(e)=>{handleModify(e)}}
-                            returnBack = {()=>ShowCheck()}
-                            data = {formData? reserved[formData.id]?.people_list.find(p => p.name === formData.name) :{male:0,female:0}}
-                            maleRemain={item.ratio.male-reserved[item.id].total_male}
-                            femaleRemain={item.ratio.female-reserved[item.id].total_female}/>
-                    </Modal>
+                    </MatchDiv>
                 </div>
-            ))}
-            </div>
+                );
+            })}
+            {console.log("modal",modalInfo)}
+            {modalInfo.currentItem && (
+                <div>
+                <Modal title="人員名單" 
+                    open={modalInfo.listStatus}
+                    onCancel={()=>handleModal(null)}
+                    footer={null}
+                >
+                    <ReservedCard 
+                        reservedData={reserved[modalInfo.currentItem.id]}
+                        matchInfo={modalInfo.currentItem}
+                    />
+                </Modal>
+
+                <Modal title="登記資訊" open={modalInfo.checkStatus} onCancel={()=>handleModal(null)} footer={null}>
+                    <ReservedCheck 
+                        handleFinish={(e)=>handleCheckInfo(e, modalInfo.currentItem.id)}/>
+                </Modal>
+                {modalInfo.isCheck && (
+                    <Modal title="修改人數 (您報名的人數如下)" open={modalInfo.modifyStatus} onCancel={()=>handleModal(null)} footer={null}>
+                        <ReservedModify 
+                            handleFinish={(e)=>{handleUpdate(e)}}
+                            returnBack={(prev) => {
+                                setModalInfo((current) => ({
+                                    ...current,
+                                    checkStatus: true,
+                                    modifyStatus: false
+                                }));
+                            }}
+                            reservedData = {reserved[modalInfo.currentItem.id].people_list.find(p => p.name === checkValues.name)}
+                            matchData = {modalInfo.currentItem}
+                            />
+                    </Modal>
+                )}
+                </div>
+            )}
+        </div>
     );
 }
 

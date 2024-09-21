@@ -18,10 +18,10 @@ const MatchDiv = styled.div`
 
 const today = new Date();
 const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-function generateString() {
+export function generateString(num) {
     let result = '';
     const charactersLength = characters.length;
-    for ( let i = 0; i < 5; i++ ) {
+    for ( let i = 0; i < num; i++ ) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -32,7 +32,7 @@ function SettingMatch() {
     const [data, setData] = useState(null);
     const [date, setDate] = useState('all');
     const initialData = {
-        "id": generateString(),
+        "id": generateString(5),
         "date": date,
         "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
         "end_time": String((today.getHours()+5)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),

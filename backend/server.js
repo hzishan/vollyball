@@ -133,14 +133,13 @@ app.post('/modify-reservation', (req, res) => {
                     return res.status(500).send('Error parsing data');
                 }
                 const result = jsonLocal[updatedData.id].findIndex(item => item.name === updatedData.name);
-                console.log(result);
                 if (result === -1) {
                     return res.status(400).send('尚未有您的預約資料');
                 }
                 else {
                     if (updatedData.mode==='modify') {
-                        jsonLocal[updatedData.id][result].male = updatedData.male;
-                        jsonLocal[updatedData.id][result].female = updatedData.female;
+                        jsonLocal[updatedData.id][result].maleNames = updatedData.maleNames;
+                        jsonLocal[updatedData.id][result].femaleNames = updatedData.femaleNames;
                     }
                     else if (updatedData.mode==='delete') { // mode==='cancel' delete the reservation
                         jsonLocal[updatedData.id].splice(result, 1);
@@ -244,7 +243,7 @@ app.post('/pickup', (req, res) => {
             // check you haven't reserved
             const result = jsonLocal[updatedData.id].findIndex(item => (item.name === updatedData.name && item.phone === updatedData.phone));
             if (result !== -1) {
-                return res.status(400).send('您已經預約過了，請使用修改功能');
+                return res.status(400).send('您已經預約過了，請勿重複預約');
             }
             // Calculate the current total reservations (male + female)
             const currentMale = jsonLocal[updatedData.id].reduce((sum, res) => sum + res.maleNames.length, 0) || 0;

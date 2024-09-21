@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { Button, Modal } from "antd";
 import DateSelection from "./components/DateSelection";
 import MatchInfoCard from './components/MatchInfoCard';
-import PickUpCard from './components/PickUpCard';
+import PickUpForm from './components/PickUpForm';
+import { generateString } from './SettingMatch';
 
 const MatchDiv = styled.div`
     border: 1px solid black;
@@ -28,22 +29,22 @@ function Pickup() {
     const [modalInfo, setModalInfo] = useState({ isOpen: false, currentItem: null }); // 控制每個比賽的 modal 狀態
 
     useEffect(() => {
-        fetch('/get-matches')
-            .then((response) => response.json())
-            .then((data) => setMatches(data))
-            .catch(error => console.error('Error fetching JSON:', error));        
-    }, []);
-    
-    useEffect(() => {
-        fetch('/get-reserved')
-            .then((response) => response.json())
-            .then((data) => setReserved(data))
-            .catch(error => console.error('Error fetching JSON:', error));
+        const fetchData = async () => {
+            try {
+                const [matchesResponse, reservedResponse] = await Promise.all([
+                    fetch('/get-matches').then(res => res.json()),
+                    fetch('/get-reserved').then(res => res.json())
+                ]);
+                setMatches(matchesResponse);
+                setReserved(reservedResponse);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
     }, []);
 
-    if (!matches || !reserved) {
-        return <p>Loading...</p>;
-    }
+    if (!matches || !reserved) return <p>Loading data...</p>;
 
     const showForm = (item) => {
         setModalInfo({ isOpen: true, currentItem: item });
@@ -54,6 +55,7 @@ function Pickup() {
     };
 
     const handlePickup = async (values) => {
+        values.userid = generateString(4);
         try {
             const response = await fetch('/pickup', {
                 method: 'POST',
@@ -75,7 +77,7 @@ function Pickup() {
     const handleFinish = (values, id, max, ready_wait) => {
         // console.log("limit",values, id, max, ready_wait);
         const total = values.maleNames.length + values.femaleNames.length;
-
+        
         if (total === 0) {
             alert('請至少報名一人');
             return;
@@ -122,7 +124,7 @@ function Pickup() {
                     footer={null}
                 >
                     {modalInfo.currentItem?.limit ? (
-                        <PickUpCard
+                        <PickUpForm
                             handleFinish={(values) => handleFinish(values,
                                 modalInfo.currentItem.id,
                                 modalInfo.currentItem.total_people - (reserved[modalInfo.currentItem.id].total_male + reserved[modalInfo.currentItem.id].total_female),
@@ -131,7 +133,7 @@ function Pickup() {
                             femaleMax={modalInfo.currentItem.ratio.female + modalInfo.currentItem.ready_wait - reserved[modalInfo.currentItem.id].total_female}
                         />
                     ) : (
-                        <PickUpCard
+                        <PickUpForm
                             handleFinish={(values) => handleFinish(values,
                                 modalInfo.currentItem.id,
                                 modalInfo.currentItem.total_people - (reserved[modalInfo.currentItem.id].total_male + reserved[modalInfo.currentItem.id].total_female),
