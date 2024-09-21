@@ -55,7 +55,7 @@ function Pickup() {
     };
 
     const handlePickup = async (values) => {
-        values.userid = generateString(4);
+        values.userID = generateString(4);
         try {
             const response = await fetch('/pickup', {
                 method: 'POST',
@@ -75,7 +75,6 @@ function Pickup() {
     };
 
     const handleFinish = (values, id, max, ready_wait) => {
-        // console.log("limit",values, id, max, ready_wait);
         const total = values.maleNames.length + values.femaleNames.length;
         
         if (total === 0) {

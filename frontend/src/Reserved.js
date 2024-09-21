@@ -38,7 +38,7 @@ function Reserved() {
         modifyStatus: false,
         currentItem: null,
         isCheck: false});
-    const [checkValues, setChcekValues] = useState(null);
+    const [userID, setUserID] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -74,11 +74,12 @@ function Reserved() {
                 body: JSON.stringify(values),
             });
             if (response.ok) {
+                const data = await response.text();
                 if (values.mode === 'delete') {
                     handleUpdate(values);
                 }
                 else if (values.mode === 'modify') {
-                    await(setChcekValues(values));
+                    setUserID(data);
                     setModalInfo((prev)=>({
                         ...prev,
                         checkStatus: false,
@@ -95,7 +96,6 @@ function Reserved() {
     };
 
     const handleUpdate = async(values) => {
-        console.log("update values",values);
         if (!(values.malaNames && values.femaleNames)) {
             values.mode = 'delete';
         }
@@ -126,6 +126,7 @@ function Reserved() {
 
                 return (date==='all' || item.date === date) && (
                 <div key={item.id}>
+                    {/* {(matchDateTime - new Date()) / 60 / 60 / 1000} */}
                     <MatchDiv>
                         <MatchInfoCard matchData={item} reservedData={reservedData} NeedDate={date==="all"}/>
                         <BtnDiv>
@@ -133,7 +134,7 @@ function Reserved() {
                                 onClick = {()=>handleModal("list",item)}
                                 type='primary'
                                 style={{borderRadius:"0 9px 0 0"}}
-                                disabled = {!canModify}
+                                disabled = {!reservedData.total_female && !reservedData.total_male}
                                 >
                                 {(reservedData.total_female||reservedData.total_male)? "已報人員":"目前沒人"}
                             </Button>
@@ -141,8 +142,7 @@ function Reserved() {
                                 onClick = {()=>handleModal("check",item)}
                                 type='primary'
                                 style={{borderRadius:"0 0 9px 0"}}
-                                disabled={(matchDateTime-new Date() < 24*60*60*1000) ||
-                                    !(reservedData.total_female||reservedData.total_male)} >
+                                disabled={!canModify} >
                                 修改報名
                             </Button>
                         </BtnDiv>
@@ -150,7 +150,6 @@ function Reserved() {
                 </div>
                 );
             })}
-            {console.log("modal",modalInfo)}
             {modalInfo.currentItem && (
                 <div>
                 <Modal title="人員名單" 
@@ -179,7 +178,7 @@ function Reserved() {
                                     modifyStatus: false
                                 }));
                             }}
-                            reservedData = {reserved[modalInfo.currentItem.id].people_list.find(p => p.name === checkValues.name)}
+                            reservedData = {reserved[modalInfo.currentItem.id].people_list.find(p => p.userID === userID)}
                             matchData = {modalInfo.currentItem}
                             />
                     </Modal>

@@ -33,7 +33,7 @@ app.get('/get-reserved', (req, res) => {
             for (const j of data[i]){
                 // let maskedName = j.name.slice(0, 1) + 'O' + j.name.slice(2); // 如果要遮蔽名字
                 peoplelist.push({
-                    name: j.name,
+                    userID: j.userID,
                     maleNames: j.maleNames,
                     femaleNames: j.femaleNames
                 });
@@ -72,14 +72,20 @@ app.post('/check-reservation', (req, res) => {
         if (matchID === -1) {
             return res.status(400).send('沒有該場次的預約資料');
         }
-        const result = jsonLocal[updatedData.id].findIndex(item => item.name === updatedData.name);
-        if (result === -1) {
+
+        const matchingNames = jsonLocal[updatedData.id].filter(item => item.name === updatedData.name);
+        if (matchingNames.length === 0) {
             return res.status(400).send('尚未有您的預約資料');
         }
-        else if (jsonLocal[updatedData.id][result].phone !== updatedData.phone) {
+
+        // 檢查電話是否匹配
+        const matchedRecord = matchingNames.find(item => item.phone === updatedData.phone);
+        if (!matchedRecord) {
             return res.status(400).send('電話號碼不符合');
         }
-        res.send('資料正確');
+
+        // 返回 userID
+        res.send(matchedRecord.userID);
     });
 });
 
@@ -263,17 +269,19 @@ app.post('/pickup', (req, res) => {
                 jsonLocal[updatedData.id] = [
                     {
                         name: updatedData.name,
+                        phone: updatedData.phone,
+                        userID: updatedData.userID,
                         maleNames: updatedData.maleNames,
-                        femaleNames: updatedData.femaleNames,
-                        phone: updatedData.phone
+                        femaleNames: updatedData.femaleNames
                     }
                 ]
             } else {
                 jsonLocal[updatedData.id].push({
                     name: updatedData.name,
+                    phone: updatedData.phone,
+                    userID: updatedData.userID,
                     maleNames: updatedData.maleNames,
-                    femaleNames: updatedData.femaleNames,
-                    phone: updatedData.phone
+                    femaleNames: updatedData.femaleNames
                 });
             }
             

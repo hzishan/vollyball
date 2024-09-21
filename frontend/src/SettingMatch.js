@@ -96,7 +96,6 @@ function SettingMatch() {
 
     return (
         <div>
-            {console.log("data",data)}
             <div style={{display:"flex", alignItems:"center"}}>
                 <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
                 {(date !== 'all') &&
