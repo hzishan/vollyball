@@ -66,6 +66,7 @@ function Pickup() {
             });
             if (response.ok) {
                 alert('報名成功');
+                window.location.reload();
             } else {
                 alert(await response.text());
             }

@@ -4,7 +4,6 @@ import styled from "styled-components";
 import { Button, Form, Input, Modal } from "antd";
 import MatchInfoCard from './components/MatchInfoCard';
 import ReservedCheck, { ReservedModify } from './components/ModifyFormObj';
-import { modalGlobalConfig } from 'antd/es/modal/confirm';
 import ReservedCard from './components/ReservedCard';
 
 const MatchDiv = styled.div`
@@ -76,6 +75,7 @@ function Reserved() {
             if (response.ok) {
                 const data = await response.text();
                 if (values.mode === 'delete') {
+                    values.userID = data;
                     handleUpdate(values);
                 }
                 else if (values.mode === 'modify') {
@@ -96,9 +96,12 @@ function Reserved() {
     };
 
     const handleUpdate = async(values) => {
-        if (!(values.malaNames && values.femaleNames)) {
-            values.mode = 'delete';
+        if (values.mode === 'modify') {
+            if (values.maleNames.length===0 && values.femaleNames.length===0){
+                values.mode = 'delete';
+            }
         }
+
         try {
             const response = await fetch('/modify-reservation', {
                 method: 'POST',
@@ -107,6 +110,11 @@ function Reserved() {
             });
             if (response.ok) {
                 alert(values.mode === 'delete' ? '取消成功' : '修改成功');
+                setModalInfo((prev)=>({
+                    ...prev,
+                    modifyStatus: false,
+                }));
+                window.location.reload();
             } else {
                 alert(await response.text());
             }

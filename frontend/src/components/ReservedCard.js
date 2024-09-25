@@ -14,7 +14,6 @@ export default function ReservedCard({ reservedData, matchInfo }) {
     const matchDateTime = new Date(`${new Date().getFullYear()}-${matchInfo.date.replace('/', '-')}-${matchInfo.start_time}:00`);
     const limitRemove = matchDateTime - new Date() < 48 * 60 * 60 * 1000;
 
-    console.log("limitRemove", limitRemove);
     if (matchInfo.limit){
         reservedData.people_list.forEach(person => {
             person.maleNames.forEach(name => {

@@ -69,6 +69,7 @@ const PersonDiv = styled.div`
     width: 100%;
 `;
 export function ReservedModify({handleFinish, returnBack, reservedData, matchData}) {
+    const [form] = useForm();
     const [maleNames, setMaleNames] = useState(reservedData.maleNames || []);
     const [femaleNames, setFemaleNames] = useState(reservedData.femaleNames || []);
     useEffect(() => {
@@ -103,17 +104,23 @@ export function ReservedModify({handleFinish, returnBack, reservedData, matchDat
         handleFinish(newReservedData);
     }
 
+    const handleModifyButtonClick = () => {
+
+        form.validateFields().then((values) => {
+            const filteredMaleNames = maleNames.filter(name => name !== '');
+            const filteredFemaleNames = femaleNames.filter(name => name !== '');
+            const formData = {
+                ...values, 
+                maleNames: filteredMaleNames,
+                femaleNames: filteredFemaleNames};
+            handleModify(formData);
+        }).catch((errorInfo) => {
+            handleFinishFailed(errorInfo);
+        });
+    };
+
     return(
         <Form 
-            onFinish={(values)=>{
-                const filteredMaleNames = maleNames.filter(name => name !== '');
-                const filteredFemaleNames = femaleNames.filter(name => name !== '');
-                const formDate = {
-                    ...values, 
-                    maleNames: filteredMaleNames,
-                    femaleNames: filteredFemaleNames};
-                handleModify(formDate);
-            }}
             onFinishFailed={handleFinishFailed}>
             <Form.Item style={{ width: '100%', display: 'flex' }} >
                 <div style={{height:30, display:'flex'}}>
@@ -164,7 +171,7 @@ export function ReservedModify({handleFinish, returnBack, reservedData, matchDat
                 >
                 返回
             </Button>
-            <Button type="primary" className = "form-btn-2" htmlType='submit'>
+            <Button type="primary" className = "form-btn-2" htmlType='button' onClick={handleModifyButtonClick}>
                 修改
             </Button>
         </Form>

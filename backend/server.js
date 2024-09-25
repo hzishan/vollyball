@@ -1,9 +1,9 @@
 const express = require('express');
 const fs = require('fs');
-const { type } = require('os');
 const app = express();
 
 app.use(express.json());
+
 
 app.get('/get-matches', (req, res) => {
     fs.readFile('./matches.json', 'utf-8', (err, data) => {
@@ -67,12 +67,10 @@ app.post('/check-reservation', (req, res) => {
             console.error('Error parsing JSON', parseErr);
             return res.status(500).send('Error parsing data');
         }
-
         const matchID = Object.keys(jsonLocal).findIndex(item_id => item_id === updatedData.id);
         if (matchID === -1) {
             return res.status(400).send('沒有該場次的預約資料');
         }
-
         const matchingNames = jsonLocal[updatedData.id].filter(item => item.name === updatedData.name);
         if (matchingNames.length === 0) {
             return res.status(400).send('尚未有您的預約資料');
@@ -91,7 +89,6 @@ app.post('/check-reservation', (req, res) => {
 
 app.post('/modify-reservation', (req, res) => {
     const updatedData = req.body;
-
     const matchFile = './matches.json';
     fs.readFile(matchFile, 'utf8', (err, matchesData) => {
         if (err) {
@@ -107,8 +104,6 @@ app.post('/modify-reservation', (req, res) => {
             return res.status(500).send('Error parsing data');
         }
         const now = new Date();
-        const nowTime = now.getHours() + ':' + now.getMinutes();
-        const nowDate = now.getMonth() + 1 + '/' + now.getDate();
         const match = matches.find(item => item.id === updatedData.id);
 
         if (!match) {
@@ -138,7 +133,7 @@ app.post('/modify-reservation', (req, res) => {
                     console.error('Error parsing JSON', parseErr);
                     return res.status(500).send('Error parsing data');
                 }
-                const result = jsonLocal[updatedData.id].findIndex(item => item.name === updatedData.name);
+                const result = jsonLocal[updatedData.id].findIndex(item => item.userID === updatedData.userID);
                 if (result === -1) {
                     return res.status(400).send('尚未有您的預約資料');
                 }
@@ -147,7 +142,7 @@ app.post('/modify-reservation', (req, res) => {
                         jsonLocal[updatedData.id][result].maleNames = updatedData.maleNames;
                         jsonLocal[updatedData.id][result].femaleNames = updatedData.femaleNames;
                     }
-                    else if (updatedData.mode==='delete') { // mode==='cancel' delete the reservation
+                    else if (updatedData.mode==='delete') {
                         jsonLocal[updatedData.id].splice(result, 1);
                     }
                 }
