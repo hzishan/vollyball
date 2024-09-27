@@ -68,6 +68,14 @@ const PersonDiv = styled.div`
     align-items: center;
     width: 100%;
 `;
+
+const InputDiv = styled.div`
+    display: flex;
+    width: 520px;
+    @media (max-width: 460px) {
+        width: 400px;
+    }
+`;
 export function ReservedModify({handleFinish, returnBack, reservedData, matchData}) {
     const [form] = useForm();
     const [maleNames, setMaleNames] = useState(reservedData.maleNames || []);
@@ -132,7 +140,7 @@ export function ReservedModify({handleFinish, returnBack, reservedData, matchDat
                         {/* <Button onClick={() => {setFemaleNames([...femaleNames, ''])}}>+</Button> */}
                     </PersonDiv>
                 </div>
-                <div style={{width:'520px', display: 'flex'}}>
+                <InputDiv>
                     <div style={{width:'43%', paddingRight:'12px'}}>
                     <PersonDiv></PersonDiv>
                     {maleNames.map((name, index) => (
@@ -164,7 +172,7 @@ export function ReservedModify({handleFinish, returnBack, reservedData, matchDat
                             </PersonDiv>
                         ))}
                     </div>
-                </div>
+                </InputDiv>
             </Form.Item>
             
             <Button type="primary" className = "form-btn-2" htmlType='button' onClick={returnBack}

@@ -15,6 +15,9 @@ const MatchDiv = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    @media (max-width: 460px) {
+        width: 100%;
+    }
 `;
 const BtnDiv = styled.div`
     display: flex;
@@ -176,7 +179,7 @@ function Reserved() {
                         handleFinish={(e)=>handleCheckInfo(e, modalInfo.currentItem.id)}/>
                 </Modal>
                 {modalInfo.isCheck && (
-                    <Modal title="修改人數 (您報名的人數如下)" open={modalInfo.modifyStatus} onCancel={()=>handleModal(null)} footer={null}>
+                    <Modal title="修改人數" open={modalInfo.modifyStatus} onCancel={()=>handleModal(null)} footer={null}>
                         <ReservedModify 
                             handleFinish={(e)=>{handleUpdate(e)}}
                             returnBack={(prev) => {

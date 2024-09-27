@@ -5,12 +5,18 @@ import dayjs from 'dayjs';
 
 const Container = styled.div`
     div{
+        width: 100%;
         display: flex;
         align-items: center;
         margin-left: 16px;
         p{
             margin: 10px 2px;
             display: inline;
+        }
+        @media (max-width: 460px) {
+            p{
+                margin: 2px;
+            }
         }
     }
 `;

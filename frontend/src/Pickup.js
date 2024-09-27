@@ -15,7 +15,10 @@ const MatchDiv = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+    @media (max-width: 460px) {
+        width: 100%;
+    }
+
     button {
         height: 100%;
         border-radius: 0 10px 10px 0;
