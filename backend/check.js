@@ -9,16 +9,18 @@ async function readData() {
 async function getMatchDetails(date, startTime) {
     const { A, B } = await readData();
     const match = A.find(item => item.date === date && item.start_time === startTime);
-
+    // console.log(match);
     if (match) {
         const participants = B[match.id] || [];
         const totalParticipants = match.total_people;
+        console.log(participants);
 
         // 輸出結果
         console.log(`場次ID: ${match.id}`);
-        console.log(`報名人員:`);
         participants.forEach(participant => {
-        console.log(`姓名: ${participant.name}, 電話: ${participant.phone}`, `報名人數: ${participant.male + participant.female}`);
+        console.log(`報名者: ${participant.name}, 電話: ${participant.phone}`);
+        console.log(`男生: ${participant.maleNames}`);
+        console.log(`女生: ${participant.femaleNames}\n`);
         });
         console.log(`總人數: ${totalParticipants}`);
     } else {
@@ -27,5 +29,5 @@ async function getMatchDetails(date, startTime) {
     }
 
 // 使用範例
-getMatchDetails("9/10", "18:20");
+getMatchDetails("10/18", "01:25");
   
