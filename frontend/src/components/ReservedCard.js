@@ -11,7 +11,8 @@ export default function ReservedCard({ reservedData, matchInfo }) {
     const displayedFemales = [];
     let waitingList = [];
 
-    const matchDateTime = new Date(`${new Date().getFullYear()}-${matchInfo.date.replace('/', '-')}-${matchInfo.start_time}:00`);
+    // const matchDateTime = new Date(`${new Date().getFullYear()}-${matchInfo.date.replace('/', '-')}-${matchInfo.start_time}:00`);
+    const matchDateTime = new Date(`${new Date().getFullYear()}-${matchInfo.date.replace('/', '-')}-${matchInfo.period.split("~")[0].split(':')[0]}:00`);
     const limitRemove = matchDateTime - new Date() < 48 * 60 * 60 * 1000;
 
     if (matchInfo.limit){
@@ -73,20 +74,26 @@ export default function ReservedCard({ reservedData, matchInfo }) {
                 }
             });
         });
-    } 
+    }
 
     return (
         <div style={{ width: '100%', display: 'flex' }}>
+            <div style={{width: '8%', marginRight:'2px', textAlign:'center'}}>
+                <h4>編號</h4>       
+                {Array.from({ length: Math.max(displayedMales.length, displayedFemales.length) }).map((_, index) => (
+                    <p key={index}>{index + 1}</p>
+                ))}
+            </div>
             <div style={{ width: '30%' }}>
                 <h4>男生名單:</h4>
-                {displayedMales.map(name => (
+                {displayedMales.map((name, index) => (
                     <p key={name}>{name}</p>
                 ))}
             </div>
 
             <div style={{ width: '30%' }}>
                 <h4>女生名單:</h4>
-                {displayedFemales.map(name => (
+                {displayedFemales.map((name, index) => (
                     <p key={name}>{name}</p>
                 ))}
             </div>

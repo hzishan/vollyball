@@ -129,18 +129,22 @@ function Reserved() {
     return (
         <div>
             <p>註: 24小時前無法修改報名</p>
-            <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
+            {/* <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/> */}
+            <DateSelection onChange={(e)=>{setDate(e)}}/>
             {matches.map((item) => {                
+                console.log(item.date, item.period);
                 // const matchDateTime = new Date(`${new Date().getFullYear()}-${item.date.replace('/', '-')}-${item.start_time}:00`);
-                const matchDateTime = new Date(new Date().getFullYear(), item.date.split('/')[0] - 1, item.date.split('/')[1], ...item.start_time.split(':'));
-
+                // const matchDateTime = new Date(new Date().getFullYear(), item.date.split('/')[0] - 1, item.date.split('/')[1], ...item.start_time.split(':'));
+                const [month, day] = item.date.split(' ')[0].split('/');
+                const matchDateTime = new Date(new Date().getFullYear(), month-1, day, ...item.period.split("~")[0].split(':')[0]);
+                
                 const reservedData = reserved[item.id] || {};
                 const canModify = matchDateTime - new Date() >= 24 * 60 * 60 * 1000 ;
                 
                 return (date==='all' || item.date === date) && (
                 <div key={item.id}>
-                    {console.log(item.date, item.start_time)}
-                    {console.log(canModify, reservedData)}
+                    {/* {console.log(item.date, item.start_time)}
+                    {console.log(canModify, reservedData)} */}
                     {/* {(matchDateTime - new Date()) / 60 / 60 / 1000} */}
                     <MatchDiv>
                         <MatchInfoCard matchData={item} reservedData={reservedData} NeedDate={date==="all"}/>

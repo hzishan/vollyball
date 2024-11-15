@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const cron = require('node-cron');
 const app = express();
 
 app.use(express.json());
@@ -111,7 +112,8 @@ app.post('/modify-reservation', (req, res) => {
         }
     
         const [matchMonth, matchDay] = match.date.split('/');
-        const [matchHour, matchMinute] = match.start_time.split(':');
+        // const [matchHour, matchMinute] = match.start_time.split(':');
+        const [matchHour, matchMinute] = match.period.split('~')[0].split(':');
         
         // 創建比賽開始時間的 Date 對象
         const matchDateTime = new Date(now.getFullYear(), matchMonth - 1, matchDay, matchHour, matchMinute);
@@ -292,6 +294,40 @@ app.post('/pickup', (req, res) => {
 });
 
 
+// 讀取 matches.json 和 reserved.json 檔案
+let matches = JSON.parse(fs.readFileSync('matches.json', 'utf8'));
+let reserved = JSON.parse(fs.readFileSync('reserved.json', 'utf8'));
+
+// 定期檢查並刪除過期的資料
+cron.schedule('0 0 * * *', () => { // 每天午夜 00:00 執行
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+  
+    // 檢查 matches 資料
+    matches = matches.filter(match => {
+      const [month, day] = match.date.split('/').map(x => parseInt(x));
+      const matchDate = new Date(currentYear, month - 1, day);
+  
+      // 處理跨年問題
+      if (month === 1 && currentDate.getMonth() === 11) {
+        matchDate.setFullYear(currentYear + 1);
+      }
+  
+      return matchDate.getTime() >= currentDate.getTime();
+    });
+    fs.writeFileSync('matches.json', JSON.stringify(matches, null, 2), 'utf8');
+  
+    // 檢查 reserved 資料
+    Object.keys(reserved).forEach(matchId => {
+      if (!matches.find(match => match.id === matchId)) {
+        delete reserved[matchId];
+      }
+    });
+    fs.writeFileSync('reserved.json', JSON.stringify(reserved, null, 2), 'utf8');
+  
+    console.log('資料更新完成');
+  });
+  
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

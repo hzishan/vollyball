@@ -12,7 +12,7 @@ const Container = styled.div`
             margin: 0 10px;
         }
         input{
-            height: 18px;
+            height: 12px;
         }
         div{
             width: 80px;
@@ -20,7 +20,7 @@ const Container = styled.div`
     }
 `;
 
-function MatchSetCard({data, onUpdate, NeedDate}) {
+function MatchSetCard({data, onUpdate, NeedDate, weekend}) {
 
     const handleChange = (key, value) => {
         const updatedData = { ...data, [key]: value };
@@ -34,8 +34,14 @@ function MatchSetCard({data, onUpdate, NeedDate}) {
     const handleRatioChange = (key, value) => {
         const updatedData = { ...data, ratio: {...data.ratio, [key]: value} };
         updatedData.total_people = updatedData.ratio.male + updatedData.ratio.female;
-        console.log("updatedData", updatedData);
         onUpdate(updatedData);
+    }
+
+    const myPeriod = {
+        "1": "9:00~13:00",
+        "2": "13:30~17:30",
+        "3": weekend? "18:00~22:00":"18:30~22:00",
+        "4": "22:15~01:15"
     }
 
     return (
@@ -43,7 +49,23 @@ function MatchSetCard({data, onUpdate, NeedDate}) {
             {NeedDate && <div>{data.date}</div>}
             <div>
                 <p>時間:</p>
-                <TimePicker
+                <Select
+                    defaultValue={data.period}
+                    style={{ width: 150 }}
+                    onChange={(e)=>handleChange('period', myPeriod[e])}
+                    >
+                        {
+                            Object.keys(myPeriod).map((key) => (
+                                <Select.Option key={key} >{myPeriod[key]}</Select.Option>
+                            ))
+                        }
+                </Select>
+                <p>場地:</p>
+                <Select defaultValue={data.location} style={{ width: 70 }} onChange={(e)=>handleChange('location', e)}>
+                    <Select.Option value="A">左</Select.Option>
+                    <Select.Option value="B">右</Select.Option>
+                </Select>
+                {/* <TimePicker
                     format={"HH:mm"} 
                     defaultValue={dayjs(data["start_time"],"HH:mm")}
                     onChange={(e)=>handleChange('start_time', e.format("HH:mm"))}
@@ -53,7 +75,7 @@ function MatchSetCard({data, onUpdate, NeedDate}) {
                     format={"HH:mm"}
                     defaultValue={dayjs(data["end_time"],"HH:mm")}
                     onChange={(e)=>handleChange('end_time', e.format("HH:mm"))}
-                    allowClear={false}/>
+                    allowClear={false}/> */}
             </div>
             <div>
                 <p>男女限制:</p>
@@ -63,6 +85,8 @@ function MatchSetCard({data, onUpdate, NeedDate}) {
                     defaultChecked={data["limit"]}
                     onChange={(e)=>handleChange('limit', e)}
                 />
+                <p>費用:</p>
+                <InputNumber min={0} defaultValue={data["fee"]} onChange={(e)=>handleChange('fee', e)}/>
             </div>
             {data["limit"]?
                 (<div>

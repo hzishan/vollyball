@@ -26,10 +26,16 @@ function MatchInfoCard({matchData, reservedData, NeedDate}) {
         <Container>
             {NeedDate && <div>{matchData.date}</div>}
             <div>
-                <p>時間:</p>
+                {/* <p>時間:</p>
                 <p>{matchData.start_time}</p>
                 <p>~</p>
-                <p>{matchData.end_time}</p>
+                <p>{matchData.end_time}</p> */}
+                <p>時間:</p>
+                <p>{matchData.period}</p>
+                <p>場地:</p>
+                <p>{matchData.location}</p>
+                <p>費用:</p>
+                <p>{matchData.fee}</p>
             </div>
             <div>
                 <p>開放人數: </p>

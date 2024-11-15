@@ -6,9 +6,9 @@ async function readData() {
   return { A, B };
 }
 
-async function getMatchDetails(date, startTime) {
+async function getMatchDetails(date, period) {
     const { A, B } = await readData();
-    const match = A.find(item => item.date === date && item.start_time === startTime);
+    const match = A.find(item => item.date === date && item.period === period);
     // console.log(match);
     if (match) {
         const participants = B[match.id] || [];
@@ -29,5 +29,5 @@ async function getMatchDetails(date, startTime) {
     }
 
 // 使用範例
-getMatchDetails("10/18", "01:25");
+getMatchDetails("11/17 日", "18:00~22:00");
   

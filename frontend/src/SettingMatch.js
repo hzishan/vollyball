@@ -34,8 +34,11 @@ function SettingMatch() {
     const initialData = {
         "id": generateString(5),
         "date": date,
-        "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
-        "end_time": String((today.getHours()+5)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
+        "period": "1",
+        "location": "A",
+        'fee':200,
+        // "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
+        // "end_time": String((today.getHours()+5)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
         "total_people": 18,
         "ready_wait":6,
         "limit": false,
@@ -97,7 +100,10 @@ function SettingMatch() {
     return (
         <div>
             <div style={{display:"flex", alignItems:"center"}}>
-                <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
+                <DateSelection onChange={(e)=>{
+                    // setDate(e.split(' ')[0]);
+                    setDate(e);
+                }}/>
                 {(date !== 'all') &&
                 <Button onClick={addMatch} type='primary' >增加場次</Button>}
             </div>
@@ -107,8 +113,10 @@ function SettingMatch() {
                     <MatchSetCard 
                         data={item}
                         onUpdate={(new_data)=>{handleUpdate(new_data, index)}}
-                        NeedDate={date==="all"}/>
-                    <Button 
+                        NeedDate={date==="all"}
+                        weekend={date.split(' ')[1]==="日" || date.split(' ')[1]==="六"}
+                        />
+                    <Button
                         onClick={()=>removeMatch(index)}
                         type='primary'
                         style={{height: '100%', borderRadius: '0 10px 10px 0'}}
