@@ -130,13 +130,17 @@ function Reserved() {
         <div>
             <p>註: 24小時前無法修改報名</p>
             <DateSelection onChange={(e)=>{setDate(e.split(' ')[0])}}/>
-            {matches.map((item) => {
-                const matchDateTime = new Date(`${new Date().getFullYear()}-${item.date.replace('/', '-')}-${item.start_time}:00`);
-                const reservedData = reserved[item.id] || {};
-                const canModify = matchDateTime - new Date() >= 24 * 60 * 60 * 1000 && (reservedData.total_female || reservedData.total_male);
+            {matches.map((item) => {                
+                // const matchDateTime = new Date(`${new Date().getFullYear()}-${item.date.replace('/', '-')}-${item.start_time}:00`);
+                const matchDateTime = new Date(new Date().getFullYear(), item.date.split('/')[0] - 1, item.date.split('/')[1], ...item.start_time.split(':'));
 
+                const reservedData = reserved[item.id] || {};
+                const canModify = matchDateTime - new Date() >= 24 * 60 * 60 * 1000 ;
+                
                 return (date==='all' || item.date === date) && (
                 <div key={item.id}>
+                    {console.log(item.date, item.start_time)}
+                    {console.log(canModify, reservedData)}
                     {/* {(matchDateTime - new Date()) / 60 / 60 / 1000} */}
                     <MatchDiv>
                         <MatchInfoCard matchData={item} reservedData={reservedData} NeedDate={date==="all"}/>
@@ -153,7 +157,7 @@ function Reserved() {
                                 onClick = {()=>handleModal("check",item)}
                                 type='primary'
                                 style={{borderRadius:"0 0 9px 0"}}
-                                disabled={!canModify} >
+                                disabled={canModify} >
                                 修改報名
                             </Button>
                         </BtnDiv>
