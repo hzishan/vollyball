@@ -34,7 +34,7 @@ function SettingMatch() {
     const initialData = {
         "id": generateString(5),
         "date": date,
-        "period": "1",
+        "period": "9:00~13:00",
         "location": "A",
         'fee':200,
         // "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),

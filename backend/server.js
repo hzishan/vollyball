@@ -163,47 +163,56 @@ app.post('/modify-reservation', (req, res) => {
 // receive data which update from client
 app.post('/update-matches', (req, res) => {
     const updatedData = req.body;
-    
+
+    // 更新 matches.json
     fs.writeFile('./matches.json', JSON.stringify(updatedData, null, 2), (err) => {
         if (err) {
-            console.error('Error writing to file', err);
-            return res.status(500).send('Error saving data');
+            console.error('Error writing to matches.json', err);
+            return res.status(500).send('Error saving matches data');
         }
 
         // 讀取 reserved.json
-        fs.readFile('./reserved.json', 'utf-8', (err, data) => {
+        fs.readFile('./reserved.json', 'utf-8', (err, reservedData) => {
             if (err) {
-                console.error('Error reading file', err);
-                return res.status(500).send('Error reading data');
+                console.error('Error reading reserved.json', err);
+                return res.status(500).send('Error reading reserved data');
             }
 
-            // 將 data 轉換為物件
-            let jsonData;
+            // 將 reservedData 轉換為物件
+            let reservedJson;
             try {
-                jsonData = JSON.parse(data);
+                reservedJson = JSON.parse(reservedData);
             } catch (parseErr) {
-                console.error('Error parsing JSON', parseErr);
-                return res.status(500).send('Error parsing data');
+                console.error('Error parsing reserved.json', parseErr);
+                return res.status(500).send('Error parsing reserved data');
             }
 
-            // 更新 jsonData
-            updatedData.forEach(item => {
-                const id = item.id;
-                if (!jsonData.hasOwnProperty(id)){
-                    jsonData[id] = [];
+            // 獲取更新後的 matches 的所有 id
+            const updatedIds = updatedData.map(item => item.id);
+
+            // 遍歷 reserved.json，移除不在 updatedIds 中的 id
+            for (const id in reservedJson) {
+                if (!updatedIds.includes(id)) {
+                    delete reservedJson[id];
+                }
+            }
+
+            // 確保更新 matches.json 中新增的 id 存在於 reserved.json
+            updatedIds.forEach(id => {
+                if (!reservedJson.hasOwnProperty(id)) {
+                    reservedJson[id] = [];
                 }
             });
 
-
             // 寫入更新後的 reserved.json
-            fs.writeFile('./reserved.json', JSON.stringify(jsonData, null, 2), (err) => {
+            fs.writeFile('./reserved.json', JSON.stringify(reservedJson, null, 2), (err) => {
                 if (err) {
-                    console.error('Error writing to file', err);
-                    return res.status(500).send('Error saving data');
+                    console.error('Error writing to reserved.json', err);
+                    return res.status(500).send('Error saving reserved data');
                 }
 
-                // 在這裡發送回應
-                res.send('Data saved successfully');
+                // 成功回應
+                res.send('Data saved successfully and cleaned up.');
             });
         });
     });

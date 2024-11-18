@@ -139,13 +139,11 @@ function Reserved() {
                 const matchDateTime = new Date(new Date().getFullYear(), month-1, day, ...item.period.split("~")[0].split(':')[0]);
                 
                 const reservedData = reserved[item.id] || {};
+                const isReserved = reservedData.total_female + reservedData.total_male > 0;
                 const canModify = matchDateTime - new Date() >= 24 * 60 * 60 * 1000 ;
                 
                 return (date==='all' || item.date === date) && (
                 <div key={item.id}>
-                    {/* {console.log(item.date, item.start_time)}
-                    {console.log(canModify, reservedData)} */}
-                    {/* {(matchDateTime - new Date()) / 60 / 60 / 1000} */}
                     <MatchDiv>
                         <MatchInfoCard matchData={item} reservedData={reservedData} NeedDate={date==="all"}/>
                         <BtnDiv>
@@ -153,15 +151,15 @@ function Reserved() {
                                 onClick = {()=>handleModal("list",item)}
                                 type='primary'
                                 style={{borderRadius:"0 9px 0 0"}}
-                                disabled = {!reservedData.total_female && !reservedData.total_male}
+                                disabled = {!isReserved}
                                 >
-                                {(reservedData.total_female||reservedData.total_male)? "已報人員":"目前沒人"}
+                                {isReserved? "已報人員":"目前沒人"}
                             </Button>
                             <Button
                                 onClick = {()=>handleModal("check",item)}
                                 type='primary'
                                 style={{borderRadius:"0 0 9px 0"}}
-                                disabled={canModify} >
+                                disabled={!(canModify && isReserved)} >
                                 修改報名
                             </Button>
                         </BtnDiv>

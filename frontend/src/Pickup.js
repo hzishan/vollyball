@@ -96,7 +96,7 @@ function Pickup() {
 
     return (
         <div>
-            <DateSelection onChange={(e) => setDate(e.split(' ')[0])} />
+            <DateSelection onChange={(e) => setDate(e)} />
             {matches.map((item) => {
                 const reservedItem = reserved[item.id];
                 const remain = item.total_people - (reservedItem.total_male + reservedItem.total_female);
