@@ -62,8 +62,8 @@ function MatchSetCard({data, onUpdate, NeedDate, weekend}) {
                 </Select>
                 <p>場地:</p>
                 <Select defaultValue={data.location} style={{ width: 70 }} onChange={(e)=>handleChange('location', e)}>
-                    <Select.Option value="A">左</Select.Option>
-                    <Select.Option value="B">右</Select.Option>
+                    <Select.Option value="左">左</Select.Option>
+                    <Select.Option value="右">右</Select.Option>
                 </Select>
                 {/* <TimePicker
                     format={"HH:mm"} 

@@ -35,7 +35,7 @@ function SettingMatch() {
         "id": generateString(5),
         "date": date,
         "period": "9:00~13:00",
-        "location": "A",
+        "location": "左",
         'fee':200,
         // "start_time": String((today.getHours()+2)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
         // "end_time": String((today.getHours()+5)%24).padStart(2,'0') + ":" + String(today.getMinutes()).padStart(2,'0'),
